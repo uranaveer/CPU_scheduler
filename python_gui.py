@@ -11,7 +11,7 @@ def run_scheduler(choice, processes, quantum=None):
             "quantum": quantum
         })
         result = subprocess.run(
-            ['./test'],
+            ['./implementation_main'],
             input=process_input,
             text=True,
             capture_output=True,
