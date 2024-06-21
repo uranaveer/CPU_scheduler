@@ -66,10 +66,11 @@ vector<vector<int>> fcfsganttchart(vector<process>& processes){
 }
 
 //implementing shortest job first(pre-emptive)/ Shortest Remaining Time First algo and caluclating process pararmeters
-void SJF(vector<process> &processes) {
+vector<vector<int>> SJF(vector<process> &processes) {
     int n = processes.size(),current_time = 0;
     int completed = 0,shortest_remanining_time = INT_MAX ,shortest_process = -1;
     bool flag = false;
+    vector<vector<int>> gantt_chart;
 
     while (completed != n) {
         // Finding process with shortest remaining time at the current time
@@ -87,6 +88,7 @@ void SJF(vector<process> &processes) {
         }
 
         // Executing the process with the shortest remaining time
+        gantt_chart.push_back({processes[shortest_process].pid, current_time, current_time + 1});
         processes[shortest_process].remainingTime--;
         shortest_remanining_time = processes[shortest_process].remainingTime;
         current_time++;
@@ -100,54 +102,17 @@ void SJF(vector<process> &processes) {
             flag = false;
         }
     }
-}
-vector<vector<int>> SJFGanttChart(const vector<process>& processes) {
-    vector<vector<int>> gantt_chart;
-    int n = processes.size();
-    int current_time = 0;
-    int completed = 0;
-    int shortest_remaining_time = INT_MAX;
-    int shortest_process = -1;
-    bool flag = false;
-    vector<int> remaining_time(n);
-    for (int i = 0; i < n; i++) {
-        remaining_time[i] = processes[i].remainingTime;
-    }
-    while (completed != n){
-        for (int i = 0; i < n; i++) {
-            if (processes[i].arrivalTime <= current_time && remaining_time[i] > 0 && remaining_time[i] < shortest_remaining_time) {
-                shortest_remaining_time = remaining_time[i];
-                shortest_process = i;
-                flag = true;
-            }
-        }
-         if (!flag) {
-            current_time++;
-            continue;
-        }
-        // Executing the process with the shortest remaining time
-        gantt_chart.push_back({processes[shortest_process].pid, current_time, current_time + 1});
-        remaining_time[shortest_process]--;
-        shortest_remaining_time = remaining_time[shortest_process];
-        current_time++;
-
-        if (remaining_time[shortest_process] == 0) {
-            completed++;
-            shortest_remaining_time = INT_MAX;
-            flag = false;
-        }
-    }
-
     return gantt_chart;
 }
 
 
 //implementing priority-premptive algo and caluclating process pararmeters
-void priority_priemptive(vector<process> &processes){
+vector<vector<int>> priority_priemptive(vector<process> &processes){
     int n = processes.size();int current_time = 0;
     int completed = 0, next_highest_priority = INT_MAX;
     int highest_priority_process = -1;
     bool flag = false;
+    vector<vector<int>> gantt_chart;
 
     while (completed != n) {
         // Finding process with the highest priority at the current time
@@ -167,7 +132,7 @@ void priority_priemptive(vector<process> &processes){
         if (processes[highest_priority_process].startTime == -1) {
             processes[highest_priority_process].startTime = current_time;
         }
-        
+        gantt_chart.push_back({processes[highest_priority_process].pid, current_time, current_time + 1});
         processes[highest_priority_process].remainingTime--;
         current_time++;
 
@@ -180,59 +145,19 @@ void priority_priemptive(vector<process> &processes){
             flag = false;
         }
     }
-    
-}
-vector<vector<int>> priorityPreemptiveGanttChart(const vector<process>& processes) {
-    vector<vector<int>> gantt_chart;
-    int n = processes.size();
-    int current_time = 0;
-    int completed = 0;
-    int next_highest_priority = INT_MAX;
-    int highest_priority_process = -1;
-    bool flag = false;
-    vector<int> remaining_time(n);
-
-    for (int i = 0; i < n; i++) {
-        remaining_time[i] = processes[i].remainingTime;
-    }
-
-    while (completed != n) {
-        // Finding process with the highest priority at the current time
-        for (int i = 0; i < n; i++) {
-            if (processes[i].arrivalTime <= current_time && remaining_time[i] > 0 && processes[i].priority < next_highest_priority) {
-                next_highest_priority = processes[i].priority;
-                highest_priority_process = i;
-                flag = true;
-            }
-        }
-        if (!flag) {
-            current_time++;
-            continue;
-        }
-
-        // Executing the process with the highest priority
-        gantt_chart.push_back({processes[highest_priority_process].pid, current_time, current_time + 1});
-        remaining_time[highest_priority_process]--;
-        current_time++;
-
-        if (remaining_time[highest_priority_process] == 0) {
-            completed++;
-            next_highest_priority = INT_MAX;
-            flag = false;
-        }
-    }
-
     return gantt_chart;
 }
 
+//implementing round robin algorithim
+vector<vector<int>> round_robin(vector<process>& processes, int quantum){
 
-void round_robin(vector<process>& processes, int quantum) {
     int n = processes.size();
     queue<int> q;
     vector<int> burst_remaining(n);
     vector<int> waitingTime(n, 0);
     vector<int> turnaroundTime(n, 0);
     vector<bool> visited(n, false);
+    vector<vector<int>> gantt_chart;
 
     for (int i = 0; i < n; ++i) {
         burst_remaining[i] = processes[i].burstTime;
@@ -246,12 +171,14 @@ void round_robin(vector<process>& processes, int quantum) {
         for(int i = 0; i < n; ++i) {
             if(burst_remaining[i] > 0 && processes[i].arrivalTime <= current_time && !visited[i]) {
                 if(burst_remaining[i] <= quantum) {
+                    gantt_chart.push_back({processes[i].pid, current_time, current_time + burst_remaining[i]});
                     current_time += burst_remaining[i];
                     burst_remaining[i] = 0;
                     visited[i] = true;
                     ++completed;
                 } 
                 else{
+                    gantt_chart.push_back({processes[i].pid, current_time, current_time + quantum});
                     burst_remaining[i] -= quantum;
                     current_time += quantum;
                      found = true;
@@ -270,45 +197,10 @@ void round_robin(vector<process>& processes, int quantum) {
         processes[i].waitingTime = turnaroundTime[i] - processes[i].burstTime;
     }
     } 
-}
-
-vector<vector<int>> roundRobinGanttChart(vector<process>& processes, int quantum) {
-    vector<vector<int>> gantt_chart;
-    int n = processes.size();
-    vector<int> burst_remaining(n);
-    vector<bool> visited(n, false);
-
-    for (int i = 0; i < n; ++i) {
-        burst_remaining[i] = processes[i].burstTime;
-    }
-
-    int current_time = 0;
-
-    while (true) {
-        bool done = true;
-
-        for (int i = 0; i < n; ++i) {
-            if (burst_remaining[i] > 0 && processes[i].arrivalTime <= current_time) {
-                done = false;
-
-                if (burst_remaining[i] <= quantum) {
-                    gantt_chart.push_back({processes[i].pid, current_time, current_time + burst_remaining[i]});
-                    current_time += burst_remaining[i];
-                    burst_remaining[i] = 0;
-                    processes[i].completionTime = current_time;
-                } else {
-                    gantt_chart.push_back({processes[i].pid, current_time, current_time + quantum});
-                    burst_remaining[i] -= quantum;
-                    current_time += quantum;
-                }
-            }
-        }
-
-        if (done) break;
-    }
-
     return gantt_chart;
 }
+
+
 
 void displayGanttChart(const vector<vector<int>>& gantt_chart) {
     cout << "\nGantt Chart:\n";
@@ -371,19 +263,17 @@ int main(){
             GanttChart=fcfsganttchart(processes);
             break;
         case 2:
-            SJF(processes);
-            GanttChart=SJFGanttChart(processes);
+            GanttChart=SJF(processes);
             break;
         case 3: {
-            priority_priemptive(processes);
-            GanttChart=priorityPreemptiveGanttChart(processes);
+            GanttChart=priority_priemptive(processes);
+            break;
         }
         case 4:{
             int quantum;
             cout << "Enter the time quantum for Round Robin: ";
             cin >> quantum;
-            round_robin(processes, quantum);
-            GanttChart=roundRobinGanttChart(processes,quantum);
+            GanttChart=round_robin(processes, quantum);
             break;
 
         }
