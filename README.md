@@ -16,14 +16,28 @@ run python_gui.py
 
 
 for terminal interface
+run implementaion_main.cpp
 ```bash
-run implementaion_main.cpp 
+g++ implementaion_main.cpp -o implementaion_main
+./implementaion_main
 ```
 
 for web interface
 ```bash
 cd web_interface/frontend
+npm install
 npm run dev
+```
+## Dependencies
+C++ comppiler <br>
+C++ Standard Library <br>
+python 3 <br>
+tkinter <br>
+react frame work
+``` bash
+"react": "^17.0.2",
+"react-dom": "^17.0.2"
+
 ```
 ## Working
 This project implements a set of CPU scheduling algorithms to manage process execution in an operating system. The supported algorithms include First-Come, First-Served (FCFS), Shortest Job First (SJF), Priority Preemptive, and Round Robin. Each algorithm is implemented to handle processes with varying arrival times, burst times, and priorities, scheduling them efficiently based on specific criteria.
